@@ -38,7 +38,12 @@ they occured before or after the ISR entry. Regardless, preliminary
 experiments show that running the logic for both encoders in a single ISR 
 seems to fix the missed-edge issue.
 
-This is not a pretty library.
+This library ONLY works on 32-bit architectures like ESP8266: the position 
+read function's access to the position variable is not interrupt guarded, so
+only on machines where a 32 bit read is an atomic operation will the read() 
+work without glitches. To be fixed if requested...
+
+This is not a pretty library. Nor will it ever be.
 */
 
 
