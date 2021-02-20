@@ -75,7 +75,7 @@ in limited testing.
 //put a "#define USE_INDEX_PIN" here if the encoders are to have index pin inputs
 #define USE_INDEX_PIN
 
-#define DEBUG
+//#define DEBUG
 
 #define DEBUG_PERIOD  300    // how many milliseconds must have elapsed since last debug output in order to take a new one
 
@@ -158,6 +158,7 @@ long oldPosition2  = -999;
 //manual circle re-setting offsets
 long raOffset = 0;
 long decOffset = 0;
+long haOffset = 0;
 
 //temporal filter state variables
 int32_t filtRa;
@@ -220,6 +221,7 @@ long getRaSec ()
   return ra;
 }
 
+
 //get declination in minutes of arc
 long getDecMin()
 {
@@ -240,6 +242,30 @@ long getDecMin()
 
 
   return dec;  
+}
+
+
+
+//get hour angle in minutes of arc
+long getHaMin()
+{
+  long polAng = filtRa - RA_ENC_ZERO;
+
+  //subtract an adjustable offset to allow setting of circle
+  long ha = (long)(  (long)((float)polAng * STEPS_TO_DEC_MIN) - haOffset  );
+
+  //force angle in range.   
+  while(ha < DEC_MIN_SEC) {
+    ha += DEC_MIN_IN_FULL_CIRCLE;
+  }
+
+  //fix angles >= 360deg 
+  while(ha >= DEC_MAX_SEC) {
+    ha -= DEC_MIN_IN_FULL_CIRCLE;
+  }
+
+
+  return ha;  
 }
 
 //serve a captive portal webpage to allow basic readout of circles and manual re-setting of circles 
@@ -288,6 +314,7 @@ void handleDecSet()
 void handlePosRead()
 {
   String ra_str;
+  String ha_str;
   String dec_str;
 
   long ra = getRaSec();
@@ -307,8 +334,18 @@ void handlePosRead()
   int dec_min = (dec -  (long)dec_deg * 60);
 
   dec_str = String(dec_deg) + "&#176; " + String(dec_min) + "\'";
+
+
+   long ha = getHaMin();
+
+  //convert arcmin to deg:arcmin
+  int ha_deg = ha / 60;
+  int ha_min = (ha -  (long)ha_deg * 60);
+
+  ha_str = String(ha_deg) + "&#176; " + String(ha_min) + "\'";
   
-  webServer.send(200, "text/html", ra_str+"\n"+dec_str+"\n");
+  
+  webServer.send(200, "text/html", ra_str+"\n"+ha_str+"\n"+dec_str+"\n");
   #ifdef DEBUG
   Serial.println("posrd");
   #endif
@@ -497,5 +534,3 @@ void attendTcpRequests()
     }
   }
 }
-
-

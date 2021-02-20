@@ -19,6 +19,7 @@ const char webpage[] PROGMEM = R"=====(
 <h1>InductorMan's Digital Setting Circles</h1>
   <h2>
     RA: <span id="right_ascention">0</span><br><br>
+    HA: <span id="hour_angle">0</span><br><br>
     Dec: <span id="declination">NA</span>
   </h2>
 </div>
@@ -55,8 +56,10 @@ function getData() {
       var data = this.responseText.split("\n");
       document.getElementById("right_ascention").innerHTML =
       data[0];
-      document.getElementById("declination").innerHTML =
+      document.getElementById("hour_angle").innerHTML =
       data[1];
+      document.getElementById("declination").innerHTML =
+      data[2];
     }
   };
   xhttp.open("GET", "pos_read", true);
